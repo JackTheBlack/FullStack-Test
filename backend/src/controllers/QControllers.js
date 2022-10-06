@@ -58,7 +58,17 @@ res.status(200).json(response.rows)
     
     const q5=async(req,res)=>{
 
-      const response=await client.query("select n.nurse_id, n.nurse_name, n.nurse_type, count(j.job_id) from nurses  as n inner join jobs as j on n.nurse_type=j.nurse_type_needed inner join nurse_hired_jobs as jh on jh.job_id=j.job_id  group by n.nurse_id, n.nurse_name")
+      const response=await client.query(`select q1.nurse_id, q1.nurse_name, ja-jh from
+      (select n.nurse_id, n.nurse_name, n.nurse_type, count(j.job_id)as ja from nurses  as n
+      inner join jobs as j on n.nurse_type=j.nurse_type_needed
+      inner join nurse_hired_jobs as jh on jh.job_id=j.job_id 
+      group by n.nurse_id, n.nurse_name) as q1
+      
+      inner join 
+      (select nurse_id ,count (nurse_id) as jh from nurse_hired_jobs
+      group by nurse_id order by nurse_id asc) as q2
+      on q2.nurse_id=q1.nurse_id 
+      `)
       console.log(response.rows)
       res.status(200).json(response.rows);
       
@@ -67,7 +77,21 @@ res.status(200).json(response.rows)
 
     const q6=async(req,res)=>{
 
-      const response=await client.query("select n.nurse_id, n.nurse_name, n.nurse_type, count(j.job_id)- from nurses  as n inner join jobs as j on n.nurse_type=j.nurse_type_needed inner join nurse_hired_jobs as jh on jh.job_id=j.job_id  group by n.nurse_id, n.nurse_name")
+      const response=await client.query(`
+      select facility_name, n.nurse_name, mp from (
+      
+      select j.facility_id, nj.nurse_id,count(nj.nurse_id) as mp 
+      from  nurse_hired_jobs as nj
+      inner join jobs as j on j.job_id=nj.job_id 	
+      group by j.facility_id, nj.nurse_id
+      order by mp desc)  as q
+      
+      inner join facilities as f on f.facility_id=q.facility_id 
+      inner join nurses as n on n.nurse_id=q.nurse_id
+      group by facility_name, nurse_name,mp
+      order by  mp DESC ,facility_name asc 
+      limit (select count (*) from facilities)
+      `)
       console.log(response.rows)
       res.status(200).json(response.rows);
       
