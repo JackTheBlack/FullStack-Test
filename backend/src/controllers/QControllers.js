@@ -56,16 +56,16 @@ res.status(200).json(response.rows)
     
     }
     
-    const q5=async()=>{
+    const q5=async(req,res)=>{
 
-      const response=await client.query("select n.nurse_id, n.nurse_name, n.nurse_type, count(j.job_id)- from nurses  as n inner join jobs as j on n.nurse_type=j.nurse_type_needed inner join nurse_hired_jobs as jh on jh.job_id=j.job_id  group by n.nurse_id, n.nurse_name")
+      const response=await client.query("select n.nurse_id, n.nurse_name, n.nurse_type, count(j.job_id) from nurses  as n inner join jobs as j on n.nurse_type=j.nurse_type_needed inner join nurse_hired_jobs as jh on jh.job_id=j.job_id  group by n.nurse_id, n.nurse_name")
       console.log(response.rows)
       res.status(200).json(response.rows);
       
 
     }
 
-    const q6=async()=>{
+    const q6=async(req,res)=>{
 
       const response=await client.query("select n.nurse_id, n.nurse_name, n.nurse_type, count(j.job_id)- from nurses  as n inner join jobs as j on n.nurse_type=j.nurse_type_needed inner join nurse_hired_jobs as jh on jh.job_id=j.job_id  group by n.nurse_id, n.nurse_name")
       console.log(response.rows)
