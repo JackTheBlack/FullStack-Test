@@ -10,21 +10,28 @@ export default function Task3(){
     const [facilities,setFacilities]=useState(null);
     const [nurses,setNurses]=useState(null);
   
-    useEffect(() => {
-      if(facilities===null){
-       try{
+  const getFacilities=async()=>{
+
+    try{
         
-        axios.get(`http://localhost:9000/q1`).then((response) => {
-          setFacilities([...response.data]);      
-          
-             
-          
-        });
-       
-    } catch(e){
-      console.log(e);
-    }}
-    });
+     await axios.get(`http://localhost:9000/q1`).then((response) => {
+        setFacilities([...response.data]);      
+        
+           
+        
+      });
+     
+  } catch(e){
+    console.log(e);
+  }}
+
+
+  
+
+
+    useEffect(() => {
+      getFacilities()
+    },[]);
 
 
     
