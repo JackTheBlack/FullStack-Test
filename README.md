@@ -1,6 +1,6 @@
 # FullStack Test
  
  Variables: 
- user:posgres
+ user:postgres
  password: 1234
  database:posgres
