@@ -15,34 +15,13 @@ const q2=async(req,res)=>{
 
 
   try{
-  const response=await client.query(`select f.facility_name, nurse_id, (sum(case when worked_shift then 1 else 0 end))-(sum(case when call_out then 1 else 0 end)*3)- (sum(case when no_call_no_show then 1 else 0 end)*5) as score   from clinician_work_history as c inner join facilities as f on f.facility_id=c.facility_id where c.facility_id=${req.query.facility_id} group by nurse_id, f.facility_name order by score desc  `)
-  
- const aux=response.rows
-
-    let nurseScore=[]
-
-   /** for(let x=0;x<=aux.length-1;x++){
-          let score=0;
-          score=score+(aux[x].worked_shift)-(aux[x].call_out*3)-(aux[x].no_call_no_show*5)
-        nurseScore.push({
-          facility_name:aux[x].facility_name,
-          nurse_id:aux[x].nurse_id,
-          score:score
-        })
-
-    }
-*/
+  const response=await client.query(`select f.facility_name, nurse_id, (sum(case when worked_shift then 1 else 0 end))-(sum(case when call_out then 1 else 0 end)*3)- (sum(case when no_call_no_show then 1 else 0 end)*5) as score   from clinician_work_history as c inner join facilities as f on f.facility_id=c.facility_id where c.facility_id=${req.query.facility_id} group by nurse_id, f.facility_name order by score desc , nurse_id desc  `)
 
 
 res.status(200).json(response.rows)
 }catch(e){
       console.log("ERROR!!",e);
-    }
-  
-
-//      score=score+(response.rows[x].worked_shift*1)-(response.rows[x].call_out*3)      
-      
-
+    }    
            
     }
   
@@ -58,16 +37,32 @@ res.status(200).json(response.rows)
     
     const q5=async(req,res)=>{
 
-      const response=await client.query(`select q1.nurse_id, q1.nurse_name, ja-jh from
-      (select n.nurse_id, n.nurse_name, n.nurse_type, count(j.job_id)as ja from nurses  as n
-      inner join jobs as j on n.nurse_type=j.nurse_type_needed
-      inner join nurse_hired_jobs as jh on jh.job_id=j.job_id 
-      group by n.nurse_id, n.nurse_name) as q1
+      const response=await client.query(`
+      select * from 
       
-      inner join 
-      (select nurse_id ,count (nurse_id) as jh from nurse_hired_jobs
-      group by nurse_id order by nurse_id asc) as q2
-      on q2.nurse_id=q1.nurse_id 
+      (select q1.nurse_id, q1.nurse_name, q1.nurse_type, (ja-jh)as ja from
+            (select n.nurse_id, n.nurse_name, n.nurse_type, count(j.job_id)as ja from nurses  as n
+            inner join jobs as j on n.nurse_type=j.nurse_type_needed
+            inner join nurse_hired_jobs as jh on jh.job_id=j.job_id 
+            group by n.nurse_id, n.nurse_name) as q1
+            
+            inner join 
+            (select nurse_id ,count (nurse_id) as jh from nurse_hired_jobs
+            group by nurse_id order by nurse_id asc) as q2
+            on q2.nurse_id=q1.nurse_id  
+      
+      union
+      
+      select q5.nurse_id,nurse_name,nurse_type, ja from (   select case when n.nurse_id not in (select nurse_id from nurse_hired_jobs group by nurse_id) 
+                     then n.nurse_id end as nurse_id from nurses as n  group by nurse_id) as q5
+               
+        inner join
+          (select n.nurse_id, n.nurse_name, n.nurse_type, count(j.job_id)as ja from nurses  as n
+            inner join jobs as j on n.nurse_type=j.nurse_type_needed
+            inner join nurse_hired_jobs as jh on jh.job_id=j.job_id 
+            group by n.nurse_id, n.nurse_name) as q1 on q1.nurse_id=q5.nurse_id) as finalq order by nurse_id asc
+          
+          
       `)
       console.log(response.rows)
       res.status(200).json(response.rows);

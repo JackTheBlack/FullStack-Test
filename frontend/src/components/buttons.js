@@ -12,11 +12,12 @@ export default function Buttons(){
         
           await axios.get(`http://localhost:9000/q4`).then((response) => {
              console.log(response.data)      
-             
+             alert("Query 4 executed")
            });
           
        } catch(e){
          console.log(e);
+         alert("Something went Wrong")
        }}
     
   
@@ -26,11 +27,12 @@ export default function Buttons(){
         
           await axios.get(`http://localhost:9000/q5`).then((response) => {
              console.log(response.data)      
-             
+             alert("Query 5 executed")
            });
           
        } catch(e){
          console.log(e);
+         alert("Something went Wrong")
        }}
     
 
@@ -40,11 +42,13 @@ export default function Buttons(){
         
           await axios.get(`http://localhost:9000/q6`).then((response) => {
              console.log(response.data)      
+             alert("Query 6 executed")
              
            });
           
        } catch(e){
          console.log(e);
+         alert("Something went Wrong")
        }}
     
 
